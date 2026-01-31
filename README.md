@@ -1,7 +1,7 @@
 # JobPortal – Backend Microservices Application
 
 ## Overview
-JobPortal is a backend-focused, microservices-based application built using Java and Spring Boot. The project demonstrates real-world backend engineering concepts such as scalability, clean architecture, asynchronous communication, and system design best practices commonly used in enterprise and fintech systems.
+JobPortal is a backend-focused, microservices-based application built using Java and Spring Boot. The project demonstrates real-world backend engineering concepts such as scalability, clean architecture, asynchronous communication, and system design best practices.
 
 ---
 
@@ -18,14 +18,13 @@ JobPortal is a backend-focused, microservices-based application built using Java
 ---
 
 ## Tech Stack
-- Java 17
+- Java 21
 - Spring Boot, Spring Security, Spring Data JPA
 - Microservices Architecture
 - API Gateway
 - Kafka
 - Redis
 - MySQL
-- Docker, AWS (design-ready)
 
 ---
 
@@ -58,7 +57,7 @@ Each microservice uses its own MySQL schema.
 - Job Service: Job management and search
 - Party Service: User registration and profile management
 - Resume Service: Resume upload and event publishing
-- Spring AI Service: Resume analysis and chatbot processing
+- Spring AI Service: Resume analysis, chatbot processing and send email on job Publish.
 
 ---
 
