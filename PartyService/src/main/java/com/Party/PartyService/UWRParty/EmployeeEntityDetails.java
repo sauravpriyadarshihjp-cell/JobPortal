@@ -1,6 +1,7 @@
 package com.Party.PartyService.UWRParty;
 
 import com.Party.PartyService.PartyException.PrtTransactionMessage;
+import com.Party.PartyService.UWREntity.PartyValues;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,11 @@ import java.util.List;
 @NoArgsConstructor
 public class EmployeeEntityDetails {
     private List<EntityParameter> lstparameter;
-    private String flag;
+    //private String flag;
     private Long partyId;
     private Long partyCode;
     private String userCode;
     private String partyType;
+    private List<PartyValues> partyList;
     private PrtTransactionMessage prtTransactionMessageMessage;
 }

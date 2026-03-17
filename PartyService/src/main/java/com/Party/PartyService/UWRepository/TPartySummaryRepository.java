@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface TPartySummaryRepository extends JpaRepository<PartyValues,  Long> {
     public List<PartyValues> findBySkillsContaining(String text);
+
+    public List<PartyValues> findByPartyId(Long id);
 }

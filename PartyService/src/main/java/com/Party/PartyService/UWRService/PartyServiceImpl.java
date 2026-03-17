@@ -15,11 +15,11 @@ import com.Party.PartyService.UWRepository.TPartyRepository;
 import com.Party.PartyService.UWRepository.TPartySummaryRepository;
 import com.Party.PartyService.UWRepository.UserRepository;
 //import com.Party.PartyService.UWRService.JwtService;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +41,10 @@ public class PartyServiceImpl implements PartyService{
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private ResumeClient resumeClient;
     @Override
-    public EmployeeEntityDetails saveEmplDtls(EmployeeEntityDetails employeeEntityDetails) {
+    public EmployeeEntityDetails saveEmplDtls(EmployeeEntityDetails employeeEntityDetails) throws PrtException {
         System.out.println("Happily entered in method saveEmplDtls with value :- "+employeeEntityDetails);
 
         //Creating Party Id
@@ -93,20 +95,33 @@ public class PartyServiceImpl implements PartyService{
 
             }
             tPartySummaryRepository.saveAndFlush(partyValues);
+            employeeEntityDetails.setPartyId(presentPartyId);
+            employeeEntityDetails.setPartyCode(tParty.getPartyCode());
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("INFO");
+            msg.setStrMessageId("200");
+            msg.setStrMessageSource("Success");
+            msg.setProbableCause("Employee Details Saved successfully");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("ERROR");
+            msg.setStrMessageId("500");
+            msg.setStrMessageSource("FATAL");
+            msg.setProbableCause("Employee Details canot be saved");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
+            throw new PrtException(msg);
         }
-        employeeEntityDetails.setPartyId(presentPartyId);
-        employeeEntityDetails.setPartyCode(tParty.getPartyCode());
-
 
         return employeeEntityDetails;
 
     }
 
     @Override
-    public void updateEmplDtls(EmployeeEntityDetails employeeEntityDetails) {
+    public EmployeeEntityDetails updateEmplDtls(EmployeeEntityDetails employeeEntityDetails) throws PrtException {
         System.out.println("Happily Entered in method updateEmplDtls with value :- "+employeeEntityDetails);
 
         try {
@@ -120,13 +135,28 @@ public class PartyServiceImpl implements PartyService{
                 entity.setPartyType(employeeEntityDetails.getPartyType());
                 repository.saveAndFlush(entity);
             }
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("INFO");
+            msg.setStrMessageId("200");
+            msg.setStrMessageSource("Success");
+            msg.setProbableCause("Employee Details updated successfully");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("ERROR");
+            msg.setStrMessageId("500");
+            msg.setStrMessageSource("FATAL");
+            msg.setProbableCause("Employee Details cannot be updated");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
+            throw new PrtException(msg);
         }
+        return employeeEntityDetails;
     }
 
     @Override
-    public EmployeeEntityDetails getEmplDtls(Long id, String user) {
+    public EmployeeEntityDetails getEmplDtls(Long id, String user) throws PrtException {
         EmployeeEntityDetails employeeEntityDetails = new EmployeeEntityDetails();
         try {
 
@@ -140,22 +170,56 @@ public class PartyServiceImpl implements PartyService{
                 entityParameter.setParameterValue(entity.getParameterValue());
                 parameters.add(entityParameter);
             }
+            List<PartyValues> list = tPartySummaryRepository.findByPartyId(id);
             employeeEntityDetails.setLstparameter(parameters);
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("INFO");
+            msg.setStrMessageId("200");
+            msg.setStrMessageSource("Success");
+            msg.setProbableCause("Employee Details Found");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("ERROR");
+            msg.setStrMessageId("500");
+            msg.setStrMessageSource("FATAL");
+            msg.setProbableCause("Employee Details Not Found");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
+            throw new PrtException(msg);
         }
+
         return employeeEntityDetails;
     }
 
     @Override
-    public String getPartyMatchingSkills(String skills) {
-        List<PartyValues> list = tPartySummaryRepository.findBySkillsContaining(skills);
-        String result = "";
-        for(PartyValues partyValues : list){
-            result = partyValues.getEmail() + "####";
+    public EmployeeEntityDetails getPartyMatchingSkills(String skills) throws PrtException {
+
+        EmployeeEntityDetails employeeEntityDetails = new EmployeeEntityDetails();
+        try {
+            List<PartyValues> list = tPartySummaryRepository.findBySkillsContaining(skills);
+            employeeEntityDetails.setPartyList(list);
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("INFO");
+            msg.setStrMessageId("200");
+            msg.setStrMessageSource("Success");
+            msg.setProbableCause("Employee Details Found");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
+        } catch (Exception e) {
+            PrtTransactionMessage msg = new PrtTransactionMessage();
+            msg.setStrMessageType("ERROR");
+            msg.setStrMessageId("500");
+            msg.setStrMessageSource("FATAL");
+            msg.setProbableCause("No Employee Found");
+            msg.setStrMessageSeverity("");
+            employeeEntityDetails.setPrtTransactionMessageMessage(msg);
+            throw new PrtException(msg);
         }
-        return result;
+
+        return employeeEntityDetails;
     }
 
     @Override
@@ -190,5 +254,19 @@ public class PartyServiceImpl implements PartyService{
         
         String token = jwtService.generateToken(user);
         return Map.of("token", token);
+    }
+
+    @Override
+    public String UploadResume(Long PartyId, MultipartFile file) {
+        //log.info("Entered in method uploadResume of service class");
+        String message = "";
+        try{
+            String partyId = String.valueOf(PartyId);
+            message = resumeClient.UploadResume(partyId, file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+       // log.info("Exiting from method UploadResume from service class");
+        return message;
     }
 }
