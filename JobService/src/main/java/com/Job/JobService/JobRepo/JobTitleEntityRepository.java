@@ -17,5 +17,5 @@ public interface JobTitleEntityRepository extends JpaRepository<JobTitleEntity, 
     @Query("SELECT T FROM JobTitleEntity T WHERE T.entityId = ?1")
     public List<JobTitleEntity> getByEntityId(Long id);
    //@Query("SELECT T FROM JobTitleEntity T WHERE T.jobTitle = ?1")
-    public Page<JobTitleEntity> findByJobTitle(String jobTitle, Pageable pageable);
+    public Page<JobTitleEntity> findByJobTitleContainingIgnoreCase(String jobTitle, Pageable pageable);
 }

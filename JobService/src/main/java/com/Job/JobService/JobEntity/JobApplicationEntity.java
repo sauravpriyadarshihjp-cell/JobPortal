@@ -20,7 +20,7 @@ public class JobApplicationEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
 
-    @Column
+    @Column(unique = true)
     private Long partyId;
 
     @Column

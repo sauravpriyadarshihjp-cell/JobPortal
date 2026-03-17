@@ -12,8 +12,6 @@ import com.Job.JobService.JobRepo.JobTitleEntityRepository;
 import com.Job.JobService.UWException.JobException;
 import com.Job.JobService.UWException.JobTransactionMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.lettuce.core.json.JsonObject;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +49,11 @@ public class JobBusinessImpl implements JobBusiness{
     private JobApplyRepository jobApplyRepository;
     @Autowired
     private ApplicationEventPublisher publisher;
+    @Autowired
+    private PartyClient partyClient;
 
     @Override
-    public JobEntityDetails PostJob(JobEntityDetails jobEntityDetails) {
+    public JobEntityDetails PostJob(JobEntityDetails jobEntityDetails) throws JobException {
         log.info("Entered in method PostJob in JobBusinessImpl with value - "+jobEntityDetails);
         JobTitleEntity jobTitleEntity = new JobTitleEntity();
 
@@ -110,12 +110,25 @@ public class JobBusinessImpl implements JobBusiness{
             jobTitleEntity.setCreatedBy(jobEntityDetails.getUserCode());
             jobTitleEntityRepository.saveAndFlush(jobTitleEntity);
             //End
-
-
-            jobEntityDetails.setProposalId(presentProposalId);
+           // jobEntityDetails.setProposalId(presentProposalId);
             jobEntityDetails.setJobId(presentjobid);
+            JobTransactionMessage jobExceptionMessage = new JobTransactionMessage();
+            jobExceptionMessage.setStrMessageId("200");
+            jobExceptionMessage.setStrMessageSource("Success");
+            jobExceptionMessage.setStrMessageSeverity("INFO");
+            jobExceptionMessage.setStrMessageType("INFO");
+            jobExceptionMessage.setStrProbableCause("Job Posted Successfully");
+            jobEntityDetails.setObjTransactionMesaage(jobExceptionMessage);
+            jobEntityDetails.setApplicationStatus("Job Posted");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            JobTransactionMessage jobExceptionMessage = new JobTransactionMessage();
+            jobExceptionMessage.setStrMessageId("500");
+            jobExceptionMessage.setStrMessageSource("SYSTEM");
+            jobExceptionMessage.setStrMessageSeverity("FATAL");
+            jobExceptionMessage.setStrMessageType("ERROR");
+            jobExceptionMessage.setStrProbableCause("Not Able to post this job");
+            jobEntityDetails.setObjTransactionMesaage(jobExceptionMessage);
+            throw new JobException(jobExceptionMessage);
         }
         log.info("Exiting from method PostJob with value of jobEntotyDetails as - "+jobEntityDetails);
         publisher.publishEvent(new JobPostedEvent(this, jobEntityDetails));
@@ -127,9 +140,16 @@ public class JobBusinessImpl implements JobBusiness{
         log.info("Entered in method with id - "+id);
         JobEntityDetails jobEntityDetails = new JobEntityDetails();
         try {
-            List<IDEntity> idEntityList =idRepository.getByProposalId(id);
+            List<IDEntity> idEntityList =idRepository.getByJobId(id);
             if(idEntityList.isEmpty()){
-                throw new RuntimeException("No Job exist with id "+id);
+                JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+                jobTransactionMessage.setStrMessageId("500");
+                jobTransactionMessage.setStrMessageSource("SYSTEM");
+                jobTransactionMessage.setStrMessageSeverity("FATAL");
+                jobTransactionMessage.setStrMessageType("ERROR");
+                jobTransactionMessage.setStrProbableCause("No job found with this id");
+                jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
+                throw new JobException(jobTransactionMessage);
             }
             List<JobEntity> list = jobRepository.getByJobId(idEntityList.get(0).getJobId());
             jobEntityDetails.setJobId(idEntityList.get(0).getJobId());
@@ -142,7 +162,15 @@ public class JobBusinessImpl implements JobBusiness{
                 parameterList.add(entityParameter);
             }
             jobEntityDetails.setLstParameter(parameterList);
-            jobEntityDetails.setProposalId(id);
+           // jobEntityDetails.setProposalId(id);
+
+            JobTransactionMessage jobExceptionMessage = new JobTransactionMessage();
+            jobExceptionMessage.setStrMessageId("200");
+            jobExceptionMessage.setStrMessageSource("Success");
+            //jobExceptionMessage.setStrMessageSeverity("INFO");
+            jobExceptionMessage.setStrMessageType("INFO");
+            jobExceptionMessage.setStrProbableCause("Job Fetched Successfully");
+            jobEntityDetails.setObjTransactionMesaage(jobExceptionMessage);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,7 +180,7 @@ public class JobBusinessImpl implements JobBusiness{
     }
 
     @Override
-    public LstJobDetail getAllJob(String title, int page) {
+    public LstJobDetail getAllJob(String title, int page) throws JobException {
         log.info("Entered in method getAllJob with value - "+title + ", "+page);
         LstJobDetail lstJobDetail = new LstJobDetail();
         try{
@@ -181,7 +209,7 @@ public class JobBusinessImpl implements JobBusiness{
 //            }
 //            lstJobDetail.setLstJobEntityDetails(jobEntityDetailsList);
             List<JobDetails> jobDetailsList = new ArrayList<>();
-            Page<JobTitleEntity> list = jobTitleEntityRepository.findByJobTitle(title, pageable);
+            Page<JobTitleEntity> list = jobTitleEntityRepository.findByJobTitleContainingIgnoreCase(title, pageable);
             List<JobTitleEntity> jobTitleEntityList = list.getContent();
             for(JobTitleEntity entity : jobTitleEntityList){
                 JobDetails jobDetails = new JobDetails();
@@ -193,10 +221,24 @@ public class JobBusinessImpl implements JobBusiness{
                 jobDetailsList.add(jobDetails);
             }
 
+            JobTransactionMessage jobExceptionMessage = new JobTransactionMessage();
+            jobExceptionMessage.setStrMessageId("200");
+            jobExceptionMessage.setStrMessageSource("Success");
+            jobExceptionMessage.setStrMessageSeverity("INFO");
+            jobExceptionMessage.setStrMessageType("INFO");
+            jobExceptionMessage.setStrProbableCause("Job Fetched Successfully");
+            lstJobDetail.setObjTransactionMesaage(jobExceptionMessage);
             lstJobDetail.setLstjobdetail(jobDetailsList);
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+            jobTransactionMessage.setStrMessageId("500");
+            jobTransactionMessage.setStrMessageSource("SYSTEM");
+            jobTransactionMessage.setStrMessageSeverity("FATAL");
+            jobTransactionMessage.setStrMessageType("ERROR");
+            jobTransactionMessage.setStrProbableCause("Cannot get Job");
+            //jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
+            throw new JobException(jobTransactionMessage);
         }
         log.info("Exiting from method getAllJob from service class");
         return lstJobDetail;
@@ -217,11 +259,15 @@ public class JobBusinessImpl implements JobBusiness{
     }
 
     @Override
-    public List<Long> getPartyMatchingSkille(String jobTitle) {
-        log.info("Inside getpartymatchingskills method of service class with jobTitle - "+ jobTitle);
+    public List<Long> getPartyMatchingSkille(String skills) {
+        log.info("Inside getpartymatchingskills method of service class with jobTitle - "+ skills);
         List<Long> lstParty = new ArrayList<>();
         try{
-            lstParty = jobClient.GetPartyByResumeSkills(jobTitle);
+            lstParty = jobClient.GetPartyByResumeSkills(skills);
+            EmployeeEntityDetails employeeEntityDetails = new EmployeeEntityDetails();
+            for(Long partyId : lstParty){
+                partyClient.getPartyByPartyId(partyId, "Admin");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -272,7 +318,7 @@ public class JobBusinessImpl implements JobBusiness{
     }
 
     @Override
-    public JobEntityDetails ApplyJob(JobEntityDetails jobEntityDetails) {
+    public JobEntityDetails ApplyJob(JobEntityDetails jobEntityDetails) throws JobException {
         log.info("Entered in method ApplyJob inside JobBusinessImpl");
 
         try{
@@ -282,20 +328,31 @@ public class JobBusinessImpl implements JobBusiness{
             jobApplicationEntity.setInsertedBy(jobEntityDetails.getUserCode());
             jobApplicationEntity.setApplicationStatus("Pending");
             jobApplyRepository.saveAndFlush(jobApplicationEntity);
+            jobEntityDetails.setApplicationId(jobApplicationEntity.getApplicationId());
+            jobEntityDetails.setApplicationStatus("Pending");
+            JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+            jobTransactionMessage.setStrMessageId("200");
+            jobTransactionMessage.setStrMessageSource("Success");
+            jobTransactionMessage.setStrMessageType("Info");
+            jobTransactionMessage.setStrProbableCause("Application Submitted Successfully");
+            jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
         } catch (Exception e) {
             e.printStackTrace();
+            JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+            jobTransactionMessage.setStrMessageId("500");
+            jobTransactionMessage.setStrMessageSource("SYSTEM");
+            jobTransactionMessage.setStrMessageSeverity("FATAL");
+            jobTransactionMessage.setStrMessageType("ERROR");
+            jobTransactionMessage.setStrProbableCause("Already Applied for the Job");
+            jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
+            throw new JobException(jobTransactionMessage);
         }
-        JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
-        jobTransactionMessage.setStrMessageId("200");
-        jobTransactionMessage.setStrMessageSource("Success");
-        jobTransactionMessage.setStrMessageType("Info");
-        jobTransactionMessage.setStrProbableCause("Application Submitted Successfully");
-        jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
+
          return jobEntityDetails;
     }
 
     @Override
-    public void TakeAction(JobEntityDetails jobEntityDetails) {
+    public JobEntityDetails TakeAction(JobEntityDetails jobEntityDetails) throws JobException {
         log.info("Happily Entered in method TakeAction of JobBusinessImpl");
 
         try{
@@ -303,10 +360,27 @@ public class JobBusinessImpl implements JobBusiness{
             jobApplicationEntity = jobApplyRepository.getByjobIdandPArtyId(jobEntityDetails.getPartyId(), jobEntityDetails.getJobId());
             jobApplicationEntity.setApplicationStatus(jobEntityDetails.getApplicationStatus());
             jobApplyRepository.saveAndFlush(jobApplicationEntity);
+            jobEntityDetails.setApplicationId(jobApplicationEntity.getApplicationId());
+            JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+            jobTransactionMessage.setStrMessageId("200");
+            jobTransactionMessage.setStrMessageSource("Success");
+            jobTransactionMessage.setStrMessageType("Info");
+            jobTransactionMessage.setStrProbableCause("Status Changed Successfully");
+            jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
         }
         catch (Exception e){
             e.printStackTrace();
+            JobTransactionMessage jobTransactionMessage = new JobTransactionMessage();
+            jobTransactionMessage.setStrMessageId("500");
+            jobTransactionMessage.setStrMessageSource("SYSTEM");
+            jobTransactionMessage.setStrMessageSeverity("FATAL");
+            jobTransactionMessage.setStrMessageType("ERROR");
+            jobTransactionMessage.setStrProbableCause("Cannot change status of job");
+            jobEntityDetails.setObjTransactionMesaage(jobTransactionMessage);
+            throw new JobException(jobTransactionMessage);
         }
+
+        return jobEntityDetails;
     }
 
     @Override

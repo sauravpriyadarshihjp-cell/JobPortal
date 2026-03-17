@@ -17,8 +17,8 @@ public class JobEntityDetails {
     private Long partyId;
     private Long applicationId;
     private String skills;
-    private Long partyType;
-    private Long proposalId;
+    private String partyType;
+    //private Long proposalId;
     private List<EntityParameter> lstParameter;
     private String userCode;
     private String applicationStatus;

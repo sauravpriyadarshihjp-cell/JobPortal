@@ -46,16 +46,16 @@ public class UWRController {
         log.info("Exiting from method ApplyJob");
         return jobEntityDetails;
     }
-    @PostMapping("TakeAction")
-    public void TakeAction(JobEntityDetails jobEntityDetails){
+    @PostMapping("UpdateStatusofJob")
+    public JobEntityDetails UpdateStatusofJob(@RequestBody JobEntityDetails jobEntityDetails){
         log.info("Happily Entered in method TakeAction of UWRController");
-
+        JobEntityDetails jobEntityDtls = new JobEntityDetails();
         try{
-            jobBusiness.TakeAction(jobEntityDetails);
+            jobEntityDtls = jobBusiness.TakeAction(jobEntityDetails);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return jobEntityDtls;
     }
     @GetMapping("/GetJob")
     public JobEntityDetails getJob(@RequestParam Long id){
@@ -99,13 +99,13 @@ public class UWRController {
         return msg;
     }
     @GetMapping("/getPartyMatchingSkills")
-    public List<Long> getPartyMatchingSkille(@RequestParam String jobTitle){
-        log.info("Inside getpartymatchingskills method of controller with jobtitle - "+jobTitle);
+    public List<Long> getPartyMatchingSkille(@RequestParam String skills){
+        log.info("Inside getpartymatchingskills method of controller with jobtitle - "+skills);
         System.out.println("Inside getpartymatchingskills method of controller");
         List<Long> lstPartyId = new ArrayList<>();
 
         try {
-              lstPartyId = jobBusiness.getPartyMatchingSkille(jobTitle);
+              lstPartyId = jobBusiness.getPartyMatchingSkille(skills);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,58 +113,60 @@ public class UWRController {
         return lstPartyId;
     }
 
-    @GetMapping("/askQuery")
-    public String askQuery(@RequestParam String text){
-        log.info("Inside askQuery method of controller class");
-            String ans = "";
-        try {
-            ans = jobBusiness.askQuery(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        log.info("Exiting method askQuery");
+//    @GetMapping("/askQuery")
+//    public String askQuery(@RequestParam String text){
+//        log.info("Inside askQuery method of controller class");
+//            String ans = "";
+//        try {
+//            ans = jobBusiness.askQuery(text);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        log.info("Exiting method askQuery");
+//
+//        return ans;
+//    }
 
-        return ans;
-    }
-    @PostMapping("/resumeScore")
-    public String getResumeScore(@RequestParam String partyId, @RequestParam String jobDesc){
-        log.info("Inside getResumeSCore method of controller class with value of partId and jobDescriptions are - "+partyId +", "+jobDesc);
-        String scoreExplanation = "";
-        try {
-            scoreExplanation = jobBusiness.getResumeScore(Long.valueOf(partyId),jobDesc);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        log.info("Exiting method getResumeScore");
+//    @PostMapping("/resumeScore")
+//    public String getResumeScore(@RequestParam String partyId, @RequestParam String jobDesc){
+//        log.info("Inside getResumeSCore method of controller class with value of partId and jobDescriptions are - "+partyId +", "+jobDesc);
+//        String scoreExplanation = "";
+//        try {
+//            scoreExplanation = jobBusiness.getResumeScore(Long.valueOf(partyId),jobDesc);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        log.info("Exiting method getResumeScore");
+//
+//        return scoreExplanation;
+//    }
 
-        return scoreExplanation;
-    }
+//    @GetMapping("/kafkaResumeScore")
+//    public String getResumeScoreByKafka(@RequestParam String partyId){
+//        String score = null;
+//        score = redisTemplate.opsForValue().get(partyId);
+//        if(score == null){
+//            return "Still processing or expired;";
+//        }
+//        return score;
+//    }
 
-    @GetMapping("/kafkaResumeScore")
-    public String getResumeScoreByKafka(@RequestParam String partyId){
-        String score = null;
-        score = redisTemplate.opsForValue().get(partyId);
-        if(score == null){
-            return "Still processing or expired;";
-        }
-        return score;
-    }
-    @GetMapping("/testredis")
-    public String testredis(){
-        redisTemplate.opsForValue().set("testKey","hello",10, TimeUnit.MINUTES);
-        return redisTemplate.opsForValue().get("testKey");
-    }
+//    @GetMapping("/testredis")
+//    public String testredis(){
+//        redisTemplate.opsForValue().set("testKey","hello",10, TimeUnit.MINUTES);
+//        return redisTemplate.opsForValue().get("testKey");
+//    }
 
-    @PostMapping("/AgentAiSearchApplyJobs")
-    public String findApplyJobs(@RequestParam String prompt, Long partyId){
-        log.info("Happily Entered in method findApplyJobs inside UWRController");
-        String response = "";
-        try{
-            response = jobBusiness.findApplyJobs(prompt,partyId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return response;
-    }
+//    @PostMapping("/AgentAiSearchApplyJobs")
+//    public String findApplyJobs(@RequestParam String prompt, Long partyId){
+//        log.info("Happily Entered in method findApplyJobs inside UWRController");
+//        String response = "";
+//        try{
+//            response = jobBusiness.findApplyJobs(prompt,partyId);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return response;
+//    }
 }

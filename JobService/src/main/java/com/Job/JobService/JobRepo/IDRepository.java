@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface IDRepository extends JpaRepository<IDEntity, Long> {
 
-    @Query("SELECT T FROM IDEntity T WHERE T.Proposalid = ?1")
+    @Query("SELECT T FROM IDEntity T WHERE T.proposalid = ?1")
     public List<IDEntity> getByProposalId(Long id);
 
     @Query("SELECT T FROM IDEntity T WHERE T.jobId = ?1")

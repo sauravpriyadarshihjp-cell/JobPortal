@@ -16,6 +16,6 @@ public class JobNotificationService {
     public void onJobPosted(JobPostedEvent event){
         JobEntityDetails jobEntityDetails = event.getjob();
         String parties = partyClient.getPartyBySkills(jobEntityDetails.getSkills());
-        springAiClient.SendNotification(parties);
+       // springAiClient.SendNotification(parties);
     }
 }

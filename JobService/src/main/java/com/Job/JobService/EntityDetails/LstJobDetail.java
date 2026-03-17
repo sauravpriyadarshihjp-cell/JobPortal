@@ -1,5 +1,6 @@
 package com.Job.JobService.EntityDetails;
 
+import com.Job.JobService.UWException.JobTransactionMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.List;
 public class LstJobDetail {
 
     private List<JobDetails> lstjobdetail;
+    private JobTransactionMessage objTransactionMesaage;
 
 
 }

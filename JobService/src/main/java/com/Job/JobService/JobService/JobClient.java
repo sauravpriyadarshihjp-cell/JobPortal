@@ -21,12 +21,12 @@ import java.util.List;
 
 @FeignClient(url = "http://localhost:8084", value = "jobclient")
 public interface JobClient {
-    @PostMapping(value = "ResumeController/uploadResume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "resume/uploadResume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String UploadResume(@RequestPart String partyId, @RequestPart MultipartFile file);
 
-    @GetMapping(value = "ResumeController/GetPartyByResumeSkills")
+    @GetMapping(value = "resume/GetPartyByResumeSkills")
     public List<Long> GetPartyByResumeSkills(@RequestParam String keyword);
 
-    @GetMapping(value = "ResumeController/GetResumeTextByPartyId")
+    @GetMapping(value = "resume/GetResumeTextByPartyId")
     public String GetResumeTextByPartyId(@RequestParam String partyId);
 }

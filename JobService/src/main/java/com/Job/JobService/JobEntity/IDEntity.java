@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
-@Table(name = "job")
+@Table(name = "job_Dtls")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class IDEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Proposalid;
+    private Long proposalid;
 
     private Long jobId;
 
