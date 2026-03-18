@@ -18,14 +18,14 @@ public class JobResumeConsumer {
     private StringRedisTemplate redisTemplate;
 
 
-    @KafkaListener(topics = "resume-score-topic", groupId = "job-service-group")
-    public void consumeResumeScore(String resumeFeedback){
-        String[] list = resumeFeedback.split("#####");
-        String partyId = "";
-        String resumeScore = "";
-        partyId = list[0];
-        resumeScore = list[1];
-        log.info("I am Happy to announce your resume score"+resumeScore);
-        redisTemplate.opsForValue().set(partyId,resumeScore,10, TimeUnit.MINUTES);
-    }
+//    @KafkaListener(topics = "resume-score-topic", groupId = "job-service-group")
+//    public void consumeResumeScore(String resumeFeedback){
+//        String[] list = resumeFeedback.split("#####");
+//        String partyId = "";
+//        String resumeScore = "";
+//        partyId = list[0];
+//        resumeScore = list[1];
+//        log.info("I am Happy to announce your resume score"+resumeScore);
+//        redisTemplate.opsForValue().set(partyId,resumeScore,10, TimeUnit.MINUTES);
+//    }
 }

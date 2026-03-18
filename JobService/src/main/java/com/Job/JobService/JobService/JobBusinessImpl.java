@@ -305,7 +305,7 @@ public class JobBusinessImpl implements JobBusiness{
            resumeScoreRequest.setPartyId(partyId);
           // scoreBrief = aiClient.scoreResume(resumeScoreRequest);
             kafkaRequest = partyId + "#####" +jobDesc +"#####" +resumeText;
-            jobResumeProducer.sendResume(kafkaRequest);
+            //jobResumeProducer.sendResume(kafkaRequest);
            // scoreBrief = resumeConsumer.consumeResumeScore("");
         } catch (Exception e) {
             e.printStackTrace();
