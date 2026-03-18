@@ -16,6 +16,8 @@ import com.Party.PartyService.UWRepository.TPartySummaryRepository;
 import com.Party.PartyService.UWRepository.UserRepository;
 //import com.Party.PartyService.UWRService.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -268,5 +270,16 @@ public class PartyServiceImpl implements PartyService{
         }
        // log.info("Exiting from method UploadResume from service class");
         return message;
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadResume(Long partyId) {
+        ResponseEntity<Resource> resource = null;
+        try{
+            resource = resumeClient.downloadResume(partyId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return resource;
     }
 }

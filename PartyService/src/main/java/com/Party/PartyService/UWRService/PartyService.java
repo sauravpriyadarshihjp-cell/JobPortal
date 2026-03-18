@@ -2,6 +2,8 @@ package com.Party.PartyService.UWRService;
 
 import com.Party.PartyService.PartyException.PrtException;
 import com.Party.PartyService.UWRParty.EmployeeEntityDetails;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
@@ -15,4 +17,6 @@ public interface PartyService {
     public Map<String, Object> register(Map<String, String> body);
     public Map<String, Object> login(Map<String, String> body);
     public String UploadResume(Long partyId, MultipartFile file);
+
+    ResponseEntity<Resource> downloadResume(Long partyId);
 }

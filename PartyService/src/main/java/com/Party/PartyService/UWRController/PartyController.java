@@ -5,7 +5,9 @@ import com.Party.PartyService.UWRParty.EmployeeEntityDetails;
 import com.Party.PartyService.UWRService.PartyService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,6 +85,17 @@ public class PartyController {
         }
         //log.info("Exiting method Upload Resume");
         return msg;
+    }
+    @GetMapping(value = "/downloadResume")
+    public ResponseEntity<Resource> downloadResume(@RequestParam Long partyId){
+        ResponseEntity<Resource> resource = null;
+        try{
+            resource = partyService.downloadResume(partyId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return resource;
     }
 
 
