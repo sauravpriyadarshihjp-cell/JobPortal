@@ -1,7 +1,11 @@
 package com.Resume.ResumeService.RsumController;
 
 import com.Resume.ResumeService.RsumService.ResumeService;
+
+import org.apache.tomcat.util.file.ConfigurationSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +29,14 @@ public class ResumeController {
         }
 
         return msg;
+    }
+
+    @GetMapping("/downloadResume")
+    public ResponseEntity<Resource> downloadResume(@RequestParam Long partyId){
+        System.out.println("Hey I am inside Download Resume Method");
+        ResponseEntity<Resource> resource = resumeService.downloadResume(partyId);
+        return resource;
+
     }
     @GetMapping("/GetPartyByResumeSkills")
     public List<Long> searchByKeyword(@RequestParam String keyword){

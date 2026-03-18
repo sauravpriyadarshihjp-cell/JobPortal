@@ -4,9 +4,15 @@ package com.Resume.ResumeService.RsumService;
 import com.Resume.ResumeService.RsumEntity.ResumeEntity;
 import com.Resume.ResumeService.RsumException.ResumeException;
 import com.Resume.ResumeService.RsumRepository.ResumeRepository;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,23 +38,44 @@ public class ResumeServiceImpl implements ResumeService{
     public String saveResume(Long PartyId, MultipartFile file) {
         System.out.println("Hey I am inside SaveResumemethod with partyId -" + PartyId);
         try {
-
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if(!Files.exists(uploadPath)){
-                Files.createDirectories(uploadPath);
-            }
+            List<ResumeEntity> resumeEntities = repository.findByPartyId(PartyId);
             String filePath = UPLOAD_DIR + file.getOriginalFilename();
+            if(resumeEntities != null){
+                ResumeEntity resume = resumeEntities.get(0);
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+                if(!Files.exists(uploadPath)){
+                    Files.createDirectories(uploadPath);
+                }
 
-            Files.write(Paths.get(filePath),file.getBytes());
+                Files.write(Paths.get(filePath),file.getBytes());
 
-            String extractedText = extractTextFromFile(filePath,file.getContentType());
-            ResumeEntity resumeEntity = new ResumeEntity();
-            resumeEntity.setResumeFileName(file.getName());
-            resumeEntity.setPartyId(PartyId);
-            resumeEntity.setResumePath(filePath);
-            resumeEntity.setResumeText(extractedText);
-            resumeEntity.setResumeContentType(file.getContentType());
-            repository.saveAndFlush(resumeEntity);
+                String extractedText = extractTextFromFile(filePath,file.getContentType());
+                ResumeEntity resumeEntity = new ResumeEntity();
+                resumeEntity.setResumeId(resume.getResumeId());
+                resumeEntity.setResumeFileName(file.getName());
+                resumeEntity.setPartyId(PartyId);
+                resumeEntity.setResumePath(filePath);
+                resumeEntity.setResumeText(extractedText);
+                resumeEntity.setResumeContentType(file.getContentType());
+                repository.saveAndFlush(resumeEntity);
+            }else{
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+                if(!Files.exists(uploadPath)){
+                    Files.createDirectories(uploadPath);
+                }
+
+                Files.write(Paths.get(filePath),file.getBytes());
+
+                String extractedText = extractTextFromFile(filePath,file.getContentType());
+                ResumeEntity resumeEntity = new ResumeEntity();
+                resumeEntity.setResumeFileName(file.getName());
+                resumeEntity.setPartyId(PartyId);
+                resumeEntity.setResumePath(filePath);
+                resumeEntity.setResumeText(extractedText);
+                resumeEntity.setResumeContentType(file.getContentType());
+                repository.saveAndFlush(resumeEntity);
+            }
+
             System.out.println("File save at location -> "+Paths.get(filePath).toAbsolutePath());
 
         } catch (Exception e) {
@@ -96,5 +123,36 @@ public class ResumeServiceImpl implements ResumeService{
 
         return resumeText;
 
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadResume(Long partyId) {
+        // Step 1: Fetch from DB
+        List<ResumeEntity> resumelist = repository.findByPartyId(partyId);
+        ResumeEntity resume = resumelist.get(0);
+
+        if (resume == null) {
+            throw new RuntimeException("Resume not found");
+        }
+
+        try {
+            // Step 2: Load file
+            Path path = Paths.get(resume.getResumePath());
+            Resource resource = new UrlResource(path.toUri());
+
+            if (!resource.exists()) {
+                throw new RuntimeException("File not found");
+            }
+
+            // Step 3: Return response
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(resume.getResumeContentType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + resume.getResumeFileName() + "\"")
+                    .body(resource);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error while downloading file", e);
+        }
     }
 }
