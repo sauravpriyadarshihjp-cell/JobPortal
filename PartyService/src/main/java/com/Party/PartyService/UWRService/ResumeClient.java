@@ -17,6 +17,6 @@ public interface ResumeClient {
     public String UploadResume(@RequestPart String partyId, @RequestPart MultipartFile file);
 
     @GetMapping(value = "resume/downloadResume")
-    public ResponseEntity<Resource> downloadResume(@RequestParam Long partyId);
+    public String downloadResume(@RequestParam Long partyId);
 
 }

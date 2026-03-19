@@ -275,11 +275,11 @@ public class PartyServiceImpl implements PartyService{
     @Override
     public ResponseEntity<Resource> downloadResume(Long partyId) {
         ResponseEntity<Resource> resource = null;
-        try{
-            resource = resumeClient.downloadResume(partyId);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try{
+//            resource = resumeClient.downloadResume(partyId);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
         return resource;
     }
 }

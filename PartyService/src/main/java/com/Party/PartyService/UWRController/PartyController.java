@@ -3,14 +3,20 @@ package com.Party.PartyService.UWRController;
 import com.Party.PartyService.PartyException.PrtException;
 import com.Party.PartyService.UWRParty.EmployeeEntityDetails;
 import com.Party.PartyService.UWRService.PartyService;
+import com.Party.PartyService.UWRService.ResumeClient;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 
 @RestController
@@ -20,6 +26,8 @@ public class PartyController {
 
         @Autowired
         private PartyService partyService;
+        @Autowired
+        private ResumeClient resumeClient;
         @PostMapping("/saveEmplDtls")
         public EmployeeEntityDetails saveEmplDtls(@RequestBody EmployeeEntityDetails employeeEntityDetails){
            try {
@@ -87,15 +95,36 @@ public class PartyController {
         return msg;
     }
     @GetMapping(value = "/downloadResume")
-    public ResponseEntity<Resource> downloadResume(@RequestParam Long partyId){
+    public ResponseEntity<byte[]> downloadResume(@RequestParam Long partyId){
         ResponseEntity<Resource> resource = null;
+        String url = "";
         try{
-            resource = partyService.downloadResume(partyId);
+            url = resumeClient.downloadResume(partyId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        return resource;
+//        return ResponseEntity
+//                .status(HttpStatus.FOUND)
+//                .location(URI.create(url))
+//                .build();
+        try {
+            URL fileUrl = new URL(url);
+            InputStream inputStream = fileUrl.openStream();
+            byte[] bytes = inputStream.readAllBytes();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=resume.pdf")
+                    .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
+                    .body(bytes);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        //return resource;
     }
 
 
