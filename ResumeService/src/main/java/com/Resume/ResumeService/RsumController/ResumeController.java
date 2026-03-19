@@ -5,10 +5,12 @@ import com.Resume.ResumeService.RsumService.ResumeService;
 import org.apache.tomcat.util.file.ConfigurationSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +34,17 @@ public class ResumeController {
     }
 
     @GetMapping("/downloadResume")
-    public ResponseEntity<Resource> downloadResume(@RequestParam Long partyId){
+    public String downloadResume(@RequestParam Long partyId){
         System.out.println("Hey I am inside Download Resume Method");
-        ResponseEntity<Resource> resource = resumeService.downloadResume(partyId);
-        return resource;
+        String url = resumeService.downloadResume(partyId);
+       // return resource;
+
+//        return ResponseEntity
+//                .status(HttpStatus.FOUND)
+//                .location(URI.create(url))
+//                .build();
+
+        return url;
 
     }
     @GetMapping("/GetPartyByResumeSkills")

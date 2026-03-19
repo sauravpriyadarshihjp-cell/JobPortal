@@ -12,5 +12,5 @@ public interface ResumeService {
     public List<Long> saerchByKeyWord(String keyWord);
     public String getResumeTextByPartyId(Long partyId);
 
-    ResponseEntity<Resource> downloadResume(Long partyId);
+    String downloadResume(Long partyId);
 }
