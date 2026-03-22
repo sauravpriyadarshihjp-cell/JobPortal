@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-@FeignClient(url = "http://localhost:8084", name = "resumeClient")
+@FeignClient(url = "https://jobportal-x29q.onrender.com", name = "resumeClient")
 public interface ResumeClient {
     @PostMapping(value = "resume/uploadResume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String UploadResume(@RequestPart String partyId, @RequestPart MultipartFile file);
