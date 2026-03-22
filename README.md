@@ -18,13 +18,16 @@ JobPortal is a backend-focused, microservices-based application built using Java
 ---
 
 ## Tech Stack
-- Java 21
-- Spring Boot, Spring Security, Spring Data JPA
-- Microservices Architecture
-- API Gateway
-- Kafka
-- Redis
-- MySQL
+
+- **Backend:** Java, Spring Boot  
+- **Security:** Spring Security, JWT  
+- **Architecture:** Microservices, REST APIs  
+- **Messaging:** Kafka (Event-driven communication)  
+- **Caching:** Redis  
+- **Database:** MySQL / PostgreSQL  
+- **File Storage:** Cloudinary  
+- **Containerization:** Docker  
+- **Deployment:** Render
 
 ---
 
@@ -48,7 +51,16 @@ Spring AI Service
 
 Redis is used for caching and async responses.
 Each microservice uses its own MySQL schema.
-```
+
+ **Live APIs**
+
+> ⚠️ Note: APIs are exposed per microservice
+
+- **Job Service (Swagger):**  
+  https://job-service-1ltr.onrender.com/swagger-ui/index.html
+
+- **Party Service (Swagger):**  
+  https://jobportal-1-x061.onrender.com/swagger-ui/index.html
 
 ---
 
